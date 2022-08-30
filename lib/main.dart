@@ -99,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
             final Widget svg = SvgPicture.network(
               assetName,
               
-              placeholderBuilder: (context) => CircularProgressIndicator(),
+              placeholderBuilder: (context) => const CircularProgressIndicator(),
             );
 
             //final Widget img = Image.asset('lib/assets/${item['time']['sigla']}.png');
