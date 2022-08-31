@@ -10,12 +10,13 @@ class JogosPage extends StatefulWidget {
 }
 
 class _JogosPageState extends State<JogosPage> {
-  List<dynamic> rodadas = [];
+  List<dynamic> partidas = [];
+  int rodadaAtual = 1;
 
-  buscaRodada(rodada) async {
+  buscaRodada() async {
     var url = Uri.parse(
         'https://api.api-futebol.com.br/v1/campeonatos/10/rodadas/' +
-            rodada.toString());
+            rodadaAtual.toString());
     final response = await http.get(
       url,
       headers: {'Authorization': 'Bearer live_8eb32c90afd40777e788da2e2ba88f'},
@@ -25,7 +26,8 @@ class _JogosPageState extends State<JogosPage> {
       final json = jsonDecode(response.body);
 
       setState(() {
-        rodadas = json;
+        partidas = json['partidas'];
+        print(partidas[1]);
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -38,10 +40,8 @@ class _JogosPageState extends State<JogosPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
+    buscaRodada();
     super.initState();
-
-    buscaRodada(1);
   }
 
   @override
@@ -50,18 +50,41 @@ class _JogosPageState extends State<JogosPage> {
       appBar: AppBar(
         title: const Text('Jogos'),
       ),
-      body: Column(
-        children: [
-          Text("rodata 1"),
-          ListView.separated(
-              itemBuilder: (context, index){
-                return ListTile(
-                  title: Text('aaaa'),
-                );
-              },
-              separatorBuilder: (_, __) => Divider(),
-              itemCount: 5)
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(
+                'Rodada ${rodadaAtual.toString()}',
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+            ),
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.9,
+              child: ListView.separated(
+                itemBuilder: (_, index) {
+                  final partida = partidas[index];
+                  return Row(
+                    children: [
+                      SizedBox(
+                        child: Center(
+                          child: Text(partida['placar'],
+                          style: TextStyle(fontSize: 20),),
+                        ),
+                        width: MediaQuery.of(context).size.width,
+                        height: 60,
+                      )
+                    ],
+                  );
+                },
+                separatorBuilder: (_, __) => const Divider(),
+                itemCount: partidas.length,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
