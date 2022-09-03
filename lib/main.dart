@@ -1,6 +1,7 @@
 import 'package:brasileirao/components/jogos.dart';
 import 'package:brasileirao/components/menu.dart';
 import 'package:brasileirao/tabela.dart';
+import 'package:brasileirao/widgets/escudo.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       routes: {
-        '/': (context) => const MyHomePage(title: 'Brasileirão 2022'),        
+        '/': (context) => const MyHomePage(title: 'Brasileirão 2022'),
         '/tabela': (context) => const TabelaPage(),
         '/jogos': (context) => const JogosPage(),
       },
@@ -41,9 +42,10 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<dynamic> tabela = [];
 
-  iniciais(String nome){
-    return (nome[0]+nome[1]+nome[2]).toUpperCase();
+  iniciais(String nome) {
+    return (nome[0] + nome[1] + nome[2]).toUpperCase();
   }
+
   buscaTabela() async {
     var url =
         Uri.parse('https://api.api-futebol.com.br/v1/campeonatos/10/tabela');
@@ -54,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
-      
+
       setState(() {
         tabela = json;
       });
@@ -93,34 +95,28 @@ class _MyHomePageState extends State<MyHomePage> {
         color: Colors.red,
         child: ListView.separated(
           itemBuilder: (context, index) {
-            final item = tabela[index];
-      
-            final String assetName = item['time']['escudo'];
-            final Widget svg = SvgPicture.network(
-              assetName,
-              
-              placeholderBuilder: (context) => const CircularProgressIndicator(),
-            );
+            final item = tabela[index];         
 
-            //final Widget img = Image.asset('lib/assets/${item['time']['sigla']}.png');
-      
+            final sigla = item['time']['sigla'];
+
             return ListTile(
-              leading: SizedBox(child:  svg, width: 50, height: 50),
-              // leading:CircleAvatar(
-              //   child: Text(iniciais(item['time']['nome_popular'])),
-              // ),
-              title: Text('#${item['posicao']} ${item['time']['nome_popular']}'),
+              leading: EscudoWidget(sigla: sigla),
+              
+              title:
+                  Text('#${item['posicao']} ${item['time']['nome_popular']}'),
               trailing: CircleAvatar(
-                  child: Text(item['pontos'].toString()),
-                  backgroundColor: item['posicao'] == 1 ? 
-                                 Colors.green : 
-                                 item['posicao'] < 17 ?
-                                 Colors.blue : Colors.red,
-                  ),
-              );
+                child: Text(item['pontos'].toString()),
+                backgroundColor: item['posicao'] == 1
+                    ? Colors.green
+                    : item['posicao'] < 17
+                        ? Colors.blue
+                        : Colors.red,
+              ),
+            );
           },
-          separatorBuilder: (context, index) => Divider(), 
-          itemCount: tabela.length,),
+          separatorBuilder: (_, __) => const Divider(),
+          itemCount: tabela.length,
+        ),
       ),
     );
   }

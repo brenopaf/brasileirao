@@ -1,4 +1,6 @@
+import 'package:brasileirao/widgets/escudo.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -54,11 +56,11 @@ class _JogosPageState extends State<JogosPage> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(20),
               child: Text(
                 'Rodada ${rodadaAtual.toString()}',
                 style:
-                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
             ),
             SizedBox(
@@ -66,20 +68,83 @@ class _JogosPageState extends State<JogosPage> {
               child: ListView.separated(
                 itemBuilder: (_, index) {
                   final partida = partidas[index];
-                  return Row(
+
+                  final dataRealizacao = partida['data_realizacao'];
+                  final horaRealizacao = partida['hora_realizacao'];
+                  final status = partida['status'];
+
+                  final nomeMandante = partida['time_mandante']['sigla'];                  
+                  final placarMandante = partida['placar_mandante'];
+
+                 final siglaMandante = partida['time_mandante']['sigla'];
+
+                  final nomeVisitante = partida['time_visitante']['sigla'];                  
+                  final placarVisitante = partida['placar_visitante'];
+                  final siglaVisitante = partida['time_visitante']['sigla'];
+
+                 
+
+                  return Column(
                     children: [
-                      SizedBox(
-                        child: Center(
-                          child: Text(partida['placar'],
-                          style: TextStyle(fontSize: 20),),
-                        ),
-                        width: MediaQuery.of(context).size.width,
-                        height: 60,
-                      )
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(dataRealizacao),
+                          const Text(' '),
+                          Text(horaRealizacao),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            child: Column(
+                              children: [
+                                Text(nomeMandante),
+                                EscudoWidget(sigla: siglaMandante),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              placarMandante.toString(),
+                              style: const TextStyle(fontSize: 28),
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text('X'),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              placarVisitante.toString(),
+                              style: const TextStyle(fontSize: 28),
+                            ),
+                          ),
+                          SizedBox(
+                            child: Column(
+                              children: [
+                                Text(nomeVisitante),
+                                EscudoWidget(sigla: siglaVisitante)
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(status),
+                        ],
+                      ),
                     ],
                   );
                 },
-                separatorBuilder: (_, __) => const Divider(),
+                separatorBuilder: (_, __) => const Divider(
+                  height: 30,
+                ),
                 itemCount: partidas.length,
               ),
             )
