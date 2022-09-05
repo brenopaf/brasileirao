@@ -52,104 +52,113 @@ class _JogosPageState extends State<JogosPage> {
       appBar: AppBar(
         title: const Text('Jogos'),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                'Rodada ${rodadaAtual.toString()}',
-                style:
-                    const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: Row(
+                children: [
+                  Text(
+                    'Rodada ${rodadaAtual.toString()}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.9,
-              child: ListView.separated(
-                itemBuilder: (_, index) {
-                  final partida = partidas[index];
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 65),
+            child: ListView.separated(
+              itemBuilder: (_, index) {
+                final partida = partidas[index];
 
-                  final dataRealizacao = partida['data_realizacao'];
-                  final horaRealizacao = partida['hora_realizacao'];
-                  final status = partida['status'];
+                final dataRealizacao = partida['data_realizacao'];
+                final horaRealizacao = partida['hora_realizacao'];
+                final status = partida['status'];
 
-                  final nomeMandante = partida['time_mandante']['sigla'];                  
-                  final placarMandante = partida['placar_mandante'];
+                final nomeMandante = partida['time_mandante']['sigla'];
+                final placarMandante = partida['placar_mandante'];
 
-                 final siglaMandante = partida['time_mandante']['sigla'];
+                final siglaMandante = partida['time_mandante']['sigla'];
 
-                  final nomeVisitante = partida['time_visitante']['sigla'];                  
-                  final placarVisitante = partida['placar_visitante'];
-                  final siglaVisitante = partida['time_visitante']['sigla'];
+                final nomeVisitante = partida['time_visitante']['sigla'];
+                final placarVisitante = partida['placar_visitante'];
+                final siglaVisitante = partida['time_visitante']['sigla'];
 
-                 
-
-                  return Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(dataRealizacao),
-                          const Text(' '),
-                          Text(horaRealizacao),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            child: Column(
-                              children: [
-                                Text(nomeMandante),
-                                EscudoWidget(sigla: siglaMandante),
-                              ],
-                            ),
+                return Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(dataRealizacao),
+                        const Text(' '),
+                        Text(horaRealizacao),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          child: Column(
+                            children: [
+                              Text(nomeMandante),
+                              EscudoWidget(sigla: siglaMandante),
+                            ],
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              placarMandante.toString(),
-                              style: const TextStyle(fontSize: 28),
-                            ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            placarMandante.toString(),
+                            style: const TextStyle(fontSize: 28),
                           ),
-                          const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text('X'),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text('X'),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            placarVisitante.toString(),
+                            style: const TextStyle(fontSize: 28),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              placarVisitante.toString(),
-                              style: const TextStyle(fontSize: 28),
-                            ),
+                        ),
+                        SizedBox(
+                          child: Column(
+                            children: [
+                              Text(nomeVisitante),
+                              EscudoWidget(sigla: siglaVisitante)
+                            ],
                           ),
-                          SizedBox(
-                            child: Column(
-                              children: [
-                                Text(nomeVisitante),
-                                EscudoWidget(sigla: siglaVisitante)
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(status),
-                        ],
-                      ),
-                    ],
-                  );
-                },
-                separatorBuilder: (_, __) => const Divider(
-                  height: 30,
-                ),
-                itemCount: partidas.length,
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Text(status),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+              separatorBuilder: (_, __) => const Divider(
+                height: 30,
               ),
-            )
-          ],
-        ),
+              itemCount: partidas.length,
+            ),
+          ),
+        ],
       ),
     );
   }
