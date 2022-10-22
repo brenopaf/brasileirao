@@ -11,8 +11,12 @@ class TabelaPage extends StatefulWidget {
 
 class _TabelaPageState extends State<TabelaPage> {
   List<dynamic> tabela = [];
+  bool loading = false;
 
   buscaTabela() async {
+    setState(() {
+      loading = true;
+    });
     var url =
         Uri.parse('https://api.api-futebol.com.br/v1/campeonatos/10/tabela');
     final response = await http.get(
@@ -24,6 +28,7 @@ class _TabelaPageState extends State<TabelaPage> {
       final json = jsonDecode(response.body);
 
       setState(() {
+        loading = false;
         tabela = json;
       });
     } else {
@@ -34,52 +39,63 @@ class _TabelaPageState extends State<TabelaPage> {
       );
     }
   }
-  
+
   @override
   void initState() {
     buscaTabela();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tabela Completa'),
       ),
-      body: SingleChildScrollView(
-        child: Stack(
-          
-          children: [DataTable(
-            columnSpacing: 20,
-            columns: const [
-              DataColumn(label: Text('')),
-              DataColumn(label: Text('J')),
-              DataColumn(label: Text('V')),
-              DataColumn(label: Text('E')),
-              DataColumn(label: Text('D')),
-              DataColumn(label: Text('GP')),
-              DataColumn(label: Text('GC')),
-              DataColumn(label: Text('SG')),
-              DataColumn(label: Text('PTS')),
-            ],
-            rows: tabela
-                .map((time) => DataRow(
-                      cells: [
-                        DataCell(Text(time['time']['sigla'])),
-                        DataCell(Text(time['jogos'].toString())),
-                        DataCell(Text(time['vitorias'].toString())),
-                        DataCell(Text(time['empates'].toString())),
-                        DataCell(Text(time['derrotas'].toString())),
-                        DataCell(Text(time['gols_pro'].toString())),
-                        DataCell(Text(time['gols_contra'].toString())),
-                        DataCell(Text(time['saldo_gols'].toString())),
-                        DataCell(Text(time['pontos'].toString())),
+      body: loading
+          ? const LinearProgressIndicator()
+          : RefreshIndicator(
+              onRefresh: () async {
+                buscaTabela();
+              },
+              color: Colors.red,
+              child: SingleChildScrollView(
+                child: Stack(
+                  children: [
+                    DataTable(
+                      columnSpacing: 20,
+                      columns: const [
+                        DataColumn(label: Text('')),
+                        DataColumn(label: Text('J')),
+                        DataColumn(label: Text('V')),
+                        DataColumn(label: Text('E')),
+                        DataColumn(label: Text('D')),
+                        DataColumn(label: Text('GP')),
+                        DataColumn(label: Text('GC')),
+                        DataColumn(label: Text('SG')),
+                        DataColumn(label: Text('PTS')),
                       ],
-                    ))
-                .toList(),
-          )],
-        ),
-      ),
+                      rows: tabela
+                          .map((time) => DataRow(
+                                cells: [
+                                  DataCell(Text(time['time']['sigla'])),
+                                  DataCell(Text(time['jogos'].toString())),
+                                  DataCell(Text(time['vitorias'].toString())),
+                                  DataCell(Text(time['empates'].toString())),
+                                  DataCell(Text(time['derrotas'].toString())),
+                                  DataCell(Text(time['gols_pro'].toString())),
+                                  DataCell(
+                                      Text(time['gols_contra'].toString())),
+                                  DataCell(Text(time['saldo_gols'].toString())),
+                                  DataCell(Text(time['pontos'].toString())),
+                                ],
+                              ))
+                          .toList(),
+                    )
+                  ],
+                ),
+              ),
+            ),
     );
   }
 }

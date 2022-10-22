@@ -41,12 +41,17 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<dynamic> tabela = [];
+  bool loading = false;
 
   iniciais(String nome) {
     return (nome[0] + nome[1] + nome[2]).toUpperCase();
   }
 
   buscaTabela() async {
+    setState(() {
+      loading = true;
+      tabela = [];
+    });
     var url =
         Uri.parse('https://api.api-futebol.com.br/v1/campeonatos/10/tabela');
     final response = await http.get(
@@ -58,6 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
       final json = jsonDecode(response.body);
 
       setState(() {
+        loading = false;
         tabela = json;
       });
     } else {
@@ -88,36 +94,37 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       drawer: MenuComponent(title: widget.title),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          buscaTabela();
-        },
-        color: Colors.red,
-        child: ListView.separated(
-          itemBuilder: (context, index) {
-            final item = tabela[index];         
+      body: loading
+          ? const LinearProgressIndicator()
+          : RefreshIndicator(
+              onRefresh: () async {
+                buscaTabela();
+              },
+              color: Colors.red,
+              child: ListView.separated(
+                itemBuilder: (context, index) {
+                  final item = tabela[index];
 
-            final sigla = item['time']['sigla'];
+                  final sigla = item['time']['sigla'];
 
-            return ListTile(
-              leading: EscudoWidget(sigla: sigla),
-              
-              title:
-                  Text('#${item['posicao']} ${item['time']['nome_popular']}'),
-              trailing: CircleAvatar(
-                child: Text(item['pontos'].toString()),
-                backgroundColor: item['posicao'] == 1
-                    ? Colors.green
-                    : item['posicao'] < 17
-                        ? Colors.blue
-                        : Colors.red,
+                  return ListTile(
+                    leading: EscudoWidget(sigla: sigla),
+                    title: Text(
+                        '#${item['posicao']} ${item['time']['nome_popular']}'),
+                    trailing: CircleAvatar(
+                      child: Text(item['pontos'].toString()),
+                      backgroundColor: item['posicao'] == 1
+                          ? Colors.green
+                          : item['posicao'] < 17
+                              ? Colors.blue
+                              : Colors.red,
+                    ),
+                  );
+                },
+                separatorBuilder: (_, __) => const Divider(),
+                itemCount: tabela.length,
               ),
-            );
-          },
-          separatorBuilder: (_, __) => const Divider(),
-          itemCount: tabela.length,
-        ),
-      ),
+            ),
     );
   }
 }

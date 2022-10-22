@@ -14,8 +14,30 @@ class JogosPage extends StatefulWidget {
 class _JogosPageState extends State<JogosPage> {
   List<dynamic> partidas = [];
   int rodadaAtual = 1;
+  bool loading = true;
+
+  buscaCampeonato() async {
+    var url = Uri.parse('https://api.api-futebol.com.br/v1/campeonatos/10');
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer live_8eb32c90afd40777e788da2e2ba88f'},
+    );
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+
+      setState(() {
+        rodadaAtual = json['rodada_atual']['rodada'];
+      });
+      await buscaRodada();
+    }
+  }
 
   buscaRodada() async {
+    setState(() {
+      loading = true;
+      partidas = [];
+    });
     var url = Uri.parse(
         'https://api.api-futebol.com.br/v1/campeonatos/10/rodadas/' +
             rodadaAtual.toString());
@@ -29,7 +51,7 @@ class _JogosPageState extends State<JogosPage> {
 
       setState(() {
         partidas = json['partidas'];
-        print(partidas[1]);
+        loading = false;
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -40,9 +62,13 @@ class _JogosPageState extends State<JogosPage> {
     }
   }
 
+  init() async {
+    await buscaCampeonato();
+  }
+
   @override
   void initState() {
-    buscaRodada();
+    init();
     super.initState();
   }
 
@@ -55,22 +81,54 @@ class _JogosPageState extends State<JogosPage> {
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                children: [
-                  Text(
-                    'Rodada ${rodadaAtual.toString()}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+            child: loading
+                ? const LinearProgressIndicator()
+                : SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: Row(
+                      children: [
+                        // Botão para voltar uma rodada
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () {
+                              if (rodadaAtual > 1) {
+                                setState(() {
+                                  rodadaAtual--;
+                                  buscaRodada();
+                                });
+                              }
+                            },
+                            child: const Icon(Icons.arrow_back_ios),
+                          ),
+                        ),
+
+                        Text(
+                          'Rodada ${rodadaAtual.toString()}',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        // Botão para avançar uma rodada
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () {
+                              if (rodadaAtual < 38) {
+                                setState(() {
+                                  rodadaAtual++;
+                                  buscaRodada();
+                                });
+                              }
+                            },
+                            child: const Icon(Icons.arrow_forward_ios),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
           ),
           Padding(
             padding: const EdgeInsets.only(top: 65),
@@ -78,17 +136,17 @@ class _JogosPageState extends State<JogosPage> {
               itemBuilder: (_, index) {
                 final partida = partidas[index];
 
-                final dataRealizacao = partida['data_realizacao'];
-                final horaRealizacao = partida['hora_realizacao'];
-                final status = partida['status'];
+                final dataRealizacao = partida['data_realizacao'] ?? '';
+                final horaRealizacao = partida['hora_realizacao'] ?? '';
+                final status = partida['status'] ?? '';
 
                 final nomeMandante = partida['time_mandante']['sigla'];
-                final placarMandante = partida['placar_mandante'];
+                final placarMandante = partida['placar_mandante'] ?? '-';
 
                 final siglaMandante = partida['time_mandante']['sigla'];
 
                 final nomeVisitante = partida['time_visitante']['sigla'];
-                final placarVisitante = partida['placar_visitante'];
+                final placarVisitante = partida['placar_visitante'] ?? '-';
                 final siglaVisitante = partida['time_visitante']['sigla'];
 
                 return Column(
